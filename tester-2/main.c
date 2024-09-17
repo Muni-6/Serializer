@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
 
             memset(&writers_data[i], 0, sizeof(tdata_t));
             writers_data[i].tid = i;
-            readers_data[i].type = 2;
+            writers_data[i].type = 2;
             writers_data[i].body = write_func;
             writers_data[i].body_arg = temp;
 

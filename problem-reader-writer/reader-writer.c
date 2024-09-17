@@ -28,7 +28,7 @@ bool reader_cond(void *arg) {
 }
 
 bool writer_cond(void *arg) {
-    return !(crowd_count(ser, write_c) && crowd_count(ser, read_c));
+    return (crowd_count(ser, write_c) == 0) && (crowd_count(ser, read_c) == 0);
 }
 
 void *reader_thread(void *arg) {
