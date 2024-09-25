@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
     printf("%s: launching threads...\n", __func__);
     int current_reader = 0;
     int current_writer = 0;
-    while ((current_reader < n_readers) && (current_writer < n_writers)) {
+    while ((current_reader < n_readers) || (current_writer < n_writers)) {
         if (current_reader < n_readers) {
             int i = current_reader;
             rdata_t *temp = (rdata_t *)malloc(sizeof(rdata_t));
