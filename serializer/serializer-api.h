@@ -7,20 +7,35 @@
 #include <pthread.h>
 #include <string.h>
 
-struct psu_serializer {
+typedef struct queue_node_t {
+    bool (*condition)(void*);
+    struct queue_node_t* next; 
+} Queue_Node;
+
+struct psu_queue {
+    Queue_Node* front;
+     Queue_Node* rear;
     // add necessary members
 };
-typedef struct psu_serializer serializer_t;
-
 struct psu_crowd {
+     int count;  
     // add necessary members
 };
 typedef struct psu_crowd crowd_t;
 
-struct psu_queue {
+typedef struct psu_queue queue_t;
+struct psu_serializer {
+    queue_t** queues;             
+    crowd_t** crowds; 
+    int queue_size;
+    int crowd_size;   
+    bool isPossessed;         
+    pthread_mutex_t lock;        
+    pthread_cond_t serializer_cond; 
     // add necessary members
 };
-typedef struct psu_queue queue_t;
+typedef struct psu_serializer serializer_t;
+
 
 serializer_t *create_serializer();
 void destroy_serializer(serializer_t *serial);
