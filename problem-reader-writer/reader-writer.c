@@ -24,6 +24,7 @@ void finish_reader_writer() {
 }
 
 bool reader_cond(void *arg) {
+    printf("entering the reader_cond function\n");
     return !crowd_count(ser, write_c);
 }
 

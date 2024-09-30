@@ -34,7 +34,7 @@
 
 serializer_t *create_serializer() {
     serializer_t* serial = (serializer_t*)malloc(sizeof(serializer_t));
-    
+    // printf("Created a Serializer\n");
     if (serial == NULL) {
         printf("Memory allocation for serializer failed!\n");
         exit(1);
@@ -60,18 +60,17 @@ serializer_t *create_serializer() {
 void destroy_serializer(serializer_t *serial) {
 
     if (serial) {
-        for (int i = 0; i < serial->queue_size; i++) {
-            free(serial->queues[i]);
-        }
-        free(serial->queues);
+        // for (int i = 0; i < serial->queue_size; i++) {
+        //     free(serial->queues[i]);
+        // }
+        // free(serial->queues);
 
-        for (int i = 0; i <serial; i++) {
-            free(serial->crowds[i]);
-        }
-        free(serial->crowds);
-
-        pthread_mutex_destroy(&serial->lock);
+        // for (int i = 0; i <serial; i++) {
+        //     free(serial->crowds[i]);
+        // }
+        // free(serial->crowds);
         pthread_cond_destroy(&serial->serializer_cond);
+        pthread_mutex_destroy(&serial->lock);
         free(serial);
     }
     
@@ -79,7 +78,7 @@ void destroy_serializer(serializer_t *serial) {
 
 void enter_serializer(serializer_t *serial) {
    pthread_mutex_lock(&serial->lock);
-
+   printf("entered Serializer\n");
    while(serial->isPossessed){
      pthread_cond_wait(&serial->serializer_cond, &serial->lock);
    }
@@ -89,14 +88,16 @@ void enter_serializer(serializer_t *serial) {
 }
 
 void exit_serializer(serializer_t *serial) {
+    printf("Exiting serializer\n");
     pthread_mutex_lock(&serial->lock);
     serial->isPossessed = false;
+    pthread_cond_signal(&serial->serializer_cond);
     pthread_mutex_unlock(&serial->lock);
 }
 
 crowd_t *create_crowd(serializer_t *serial) {
     crowd_t *crowd = (crowd_t *)malloc(sizeof(crowd_t));
-
+    printf("Created a Crowd\n");
     if (crowd) {
         crowd->count = 0;
         serial->crowds[serial->crowd_size] = crowd;
@@ -131,6 +132,7 @@ void destroy_crowd(serializer_t *serial, crowd_t *crowd) {
 void join_crowd(serializer_t *serial, crowd_t *crowd, void (*body)(void *), void *body_args) {
     // Put the executing thread into crowd
      pthread_mutex_lock(&serial->lock);
+     printf("Joining the Crowd\n\n");
      crowd->count++;
 
     // Release possession of the serializer
@@ -142,22 +144,25 @@ void join_crowd(serializer_t *serial, crowd_t *crowd, void (*body)(void *), void
 
     // Perform leave_crowd operation
     pthread_mutex_lock(&serial->lock);
-    while(!serial->isPossessed)
-      pthread_cond_wait(&serial->serializer_cond, &serial->lock);
+    printf("Gained possen again after crowd\n");
+    // while(!serial->isPossessed){
+    //     printf("going in loop here???\n");
+    //     pthread_cond_wait(&serial->serializer_cond, &serial->lock);
+    // }
     serial->isPossessed = true;
     crowd->count--;
     pthread_mutex_unlock(&serial->lock);
 }
 
 int crowd_count(serializer_t *serial, crowd_t *crowd) {
-    pthread_mutex_lock(&serial->lock);
+    printf("Entering the crowd Count function\n");
     int ret = crowd->count;
-    pthread_mutex_unlock(&serial->lock);
     return ret;
 }
 
 queue_t *create_queue(serializer_t *serial) {
     queue_t* new_queue = (queue_t*)malloc(sizeof(queue_t));
+    printf("Creating the Queue\n");
     if (new_queue == NULL) {
         printf("Memory allocation for new queue failed!\n");
         pthread_mutex_unlock(&serial->lock);  // Unlock before returning
@@ -201,38 +206,55 @@ void destroy_queue(serializer_t *serial, queue_t *queue) {
 void enqueue(serializer_t *serial, queue_t *queue, bool (*cond)(void *)) {
     // Place the executing thread into end of queue
    pthread_mutex_lock(&serial->lock);
+   printf("Enqueuing the process\n");
+//    printf("cond addresss while entering %p\n", cond);
    Queue_Node* temp = (Queue_Node*)malloc(sizeof(Queue_Node));
     if (temp == NULL) {
         printf("Memory allocation failed\n");
         exit(1); 
     }
+    // printf("Queue Node Created\n");
     temp->condition = cond;
     temp->next = NULL;  
+    // printf("%p queue->rear, %p queue->front\n", queue->rear, queue->front);
     if (queue->rear == NULL && queue->front == NULL) {
         queue->front = temp;
+        printf("queue->front %p, temp %p\n", queue->front, temp);
         queue->rear = temp;
     }
     else{
+        printf("In else queue->front %p, temp %p\n", queue->front, temp);
          queue->rear->next = temp;
          queue->rear = temp;
     }
+    // printf("Out of if and else queue->front %p, temp %p\n", queue->front, temp);
     serial->isPossessed = false;
     pthread_cond_signal(&serial->serializer_cond);
     // Check condition when head of queue is reached
     int index = -1;
-    for (int i = 0; i < serial->queue_size; i++) {
-            if (serial->queues[i] == queue) {
-                index = i;
-                break;
-            }
-    }
-
-    while((serial->queues[index] != temp) || (!(queue->front->condition(NULL)))){
-         pthread_cond_wait(&serial->serializer_cond, &serial->lock);
+    printf("Serial->queue_size is %d\n", serial->queue_size);
+    // for (int i = 0; i < serial->queue_size; i++) {
+    //     printf("%p == %p\n", serial->queues[i], queue);
+    //         if (serial->queues[i] == queue) {
+    //             printf("%p == %p\n", serial->queues[i], queue);
+    //             index = i;
+    //             break;
+    //         }
+    // }
+     //printf("The value of the condition call is %d",queue->front->condition(NULL));
+    // printf("cond address is %p\n",queue->front->condition);
+    printf("queue->front is %p, temp is %p\n", queue->front, temp);
+   
+    while((queue->front != temp) || (!(queue->front->condition(NULL)))){
+        printf("Is it in loop for ever\n");
+        // pthread_cond_signal(&serial->serializer_cond);
+        pthread_cond_wait(&serial->serializer_cond, &serial->lock);
     }
  // Perform dequeue operation
     serial->isPossessed = true;
+    printf("Before dequeue %p\n", queue->front);
     Queue_Node* temp2 = queue->front;
     queue->front = queue->front->next;
+    printf("After dequeue %p\n", queue->front);
     pthread_mutex_unlock(&serial->lock); 
 }
