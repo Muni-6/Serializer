@@ -216,7 +216,7 @@ void enqueue(serializer_t *serial, queue_t *queue, bool (*cond)(void *)) {
     // printf("Queue Node Created\n");
     temp->condition = cond;
     temp->next = NULL;  
-    // printf("%p queue->rear, %p queue->front\n", queue->rear, queue->front);
+    printf("%p queue->rear, %p queue->front\n", queue->rear, queue->front);
     if (queue->rear == NULL && queue->front == NULL) {
         queue->front = temp;
         printf("queue->front %p, temp %p\n", queue->front, temp);
@@ -254,7 +254,13 @@ void enqueue(serializer_t *serial, queue_t *queue, bool (*cond)(void *)) {
     serial->isPossessed = true;
     printf("Before dequeue %p\n", queue->front);
     Queue_Node* temp2 = queue->front;
-    queue->front = queue->front->next;
+    if(queue->front == queue->rear){
+        queue->front = NULL;
+        queue->rear = NULL;
+    }else{
+        queue->front = queue->front->next;
+    }
+    
     printf("After dequeue %p\n", queue->front);
     pthread_mutex_unlock(&serial->lock); 
 }
