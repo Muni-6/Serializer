@@ -14,7 +14,8 @@ typedef struct queue_node_t {
 
 struct psu_queue {
     Queue_Node* front;
-     Queue_Node* rear;
+    Queue_Node* rear;
+    pthread_cond_t queue_cond; 
     // add necessary members
 };
 struct psu_crowd {
