@@ -10,21 +10,21 @@
 typedef struct queue_node_t {
     bool (*condition)(void*);
     struct queue_node_t* next; 
-    // pthread_cond_t node_cond; 
+    pthread_cond_t node_condV; 
     int id;
-    
 } Queue_Node;
 
 struct psu_queue {
     Queue_Node* front;
     Queue_Node* rear;
-    pthread_cond_t queue_cond; 
+    // pthread_cond_t queue_cond; 
     int nodes;
+    int size;
     // add necessary members
 };
 struct psu_crowd {
      int count;  
-     pthread_cond_t crowd_cond; 
+    //  pthread_cond_t crowd_cond; 
     // add necessary members
 };
 typedef struct psu_crowd crowd_t;
@@ -35,11 +35,11 @@ struct psu_serializer {
     crowd_t** crowds; 
     int queue_size;
     int crowd_size;   
-    bool isPossessed;     
-    bool isPossessedCrowd; 
+    // bool isPossessed;     
+    // bool isPossessedCrowd; 
     // bool dequeue;     
     pthread_mutex_t lock;        
-    pthread_cond_t serializer_cond; 
+    // pthread_cond_t serializer_cond; 
     // add necessary members
 };
 typedef struct psu_serializer serializer_t;
