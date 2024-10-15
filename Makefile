@@ -1,5 +1,5 @@
 PROBLEM_SUBDIRS = problem-reader-writer problem-monkey-crossing problem-child-care
-TESTER_SUBDIRS = tester-1 tester-2 tester-4 tester-child-care
+TESTER_SUBDIRS = tester-1 tester-2 tester-monkey-crossing tester-child-care-1 tester-child-care-2
 CLEAN_SUBDIRS = clean-serializer $(addprefix clean-,$(PROBLEM_SUBDIRS)) $(addprefix clean-,$(TESTER_SUBDIRS)) 
 
 .PHONY: clean serializer $(PROBLEM_SUBDIRS) $(TESTER_SUBDIRS) $(CLEAN_SUBDIRS)
