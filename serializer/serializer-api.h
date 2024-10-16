@@ -6,13 +6,9 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include <string.h>
+#include "serializer.h"
 
-typedef struct queue_node_t {
-    bool (*condition)(void*);
-    struct queue_node_t* next; 
-    pthread_cond_t node_condV; 
-    int id;
-} Queue_Node;
+
 
 struct psu_queue {
     Queue_Node* front;

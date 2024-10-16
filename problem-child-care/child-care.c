@@ -25,7 +25,6 @@ void init_child_care() {
      CAREGIVER_READY_DEPART = 0;
      CHILD_ARRIVED = 0;
      CHILD_READY_DEPART = 0;
-     CHILD_INTO_DEPART = 0;
      CHILD_DEPART = 0;
      CAREGIVER_DEPART = 0;
      CHILD_READY_DEPARTING =0;
@@ -34,7 +33,7 @@ void init_child_care() {
 
 void finish_child_care() {
     // Destroy only the initialized crowds and queues
-    printf("Destroying\n\n\n");
+    //printf("Destroying\n\n\n");
     destroy_crowd(ser, caregiver_arrive_crowd);
     destroy_crowd(ser, child_arrive_crowd);
     destroy_crowd(ser, caregiver_depart_crowd);
@@ -59,15 +58,6 @@ bool child_depart_cond(void *arg) {
 }
 
 bool caregiver_depart_cond(void *arg) {
-//  //childArived>0 && ChildDepart>0; caregiverarrived>0 && caregiverdepart>1; caregiverReaadyDepart>0;
-//  bool cond1 = ((CHILD_ARRIVED - CHILD_READY_DEPART)==0) && (CHILD_INTO_DEPART==0);
-//  printf("THE CONDITION1 is %d\n", cond1);
-//  bool cond2 = (CAREGIVER_ARRIVED>0) || (CAREGIVER_READY_DEPART>1);
-//  printf("THE CONDITION2 is %d\n", cond2);
-//  bool cond3 = CAREGIVER_READY_DEPART>0;
-//  printf("THE CONDITION3 is %d\n", cond3);
-
-//  return cond3 && (cond1 || cond2);
 //childArived==0 && ChildReadyDeparting==0 && childdepart==0; caregiverarrived>1 && caregiverarrived>0; 
     bool cond1 = (CHILD_ARRIVED == 0) && (CHILD_READY_DEPARTING ==0) && (CHILD_DEPART == 0) && (CHILD_READY_DEPART == 0);
     bool cond2 = CAREGIVER_ARRIVED > 1;
@@ -78,8 +68,6 @@ bool caregiver_depart_cond(void *arg) {
 
 bool child_arrive_cond(void *arg) {
 //   //atleast onecare giver CAREGIVER_ARRIVED>0
-//   return CAREGIVER_ARRIVED>0 || CAREGIVER_READY_DEPART>0;
-
     return CAREGIVER_ARRIVED > 0;
 }
 
@@ -101,14 +89,14 @@ void *caregiver_depart_thread(void *arg) {
     tdata_t *td = (tdata_t *)arg;
 
     enter_serializer(ser);
-    printf("Care giver departing  queue\n");
+    //printf("Care giver departing  queue\n");
     enqueue(ser, caregiver_depart_queue, caregiver_depart_cond);//childArived==0 && ChildReadyDeparting==0 && childdepart==0; caregiverarrived>1 && caregiverarrived>0; //
     CAREGIVER_ARRIVED--;
     CAREGIVER_DEPART++;
-    printf("Care giver joining departing  crowd\n");
+    //printf("Care giver joining departing  crowd\n");
     join_crowd(ser, caregiver_depart_crowd, td->body, td->body_arg);
     CAREGIVER_DEPART--;
-    printf("EXIT caregiver departed\n");
+    //printf("EXIT caregiver departed\n");
     exit_serializer(ser);
    
     pthread_exit(NULL);
@@ -118,17 +106,17 @@ void *child_arrive_thread(void *arg) {
     tdata_t *td = (tdata_t *)arg;
 
     enter_serializer(ser);
-    printf("Child entering the arriving queue\n");
-     CHILD_ARRIVED++; //Child arrived here
+    //printf("Child entering the arriving queue\n");
+    CHILD_ARRIVED++; //Child arrived here
     enqueue(ser, child_arrive_queue, child_arrive_cond);//atleast onecare giver CAREGIVER_ARRIVED>0
 
    
-    printf("Child entering the arrival join crowd queue\n");
+    //printf("Child entering the arrival join crowd queue\n");
     join_crowd(ser, child_arrive_crowd, td->body, td->body_arg);
 
     CHILD_ARRIVED--; //when he is exiting means he is ready to depart and is no more in arrival;
     CHILD_READY_DEPART++;//he is now ready to depart
-    printf("EXIT child arrive exited\n"); 
+    //printf("EXIT child arrive exited\n"); 
     exit_serializer(ser);
     pthread_exit(NULL);
 }
@@ -137,7 +125,7 @@ void *child_depart_thread(void *arg) {
     tdata_t *td = (tdata_t *)arg;
 
     enter_serializer(ser); 
-    printf("Child entering the departing  queue\n");
+    //printf("Child entering the departing  queue\n");
     
     CHILD_READY_DEPARTING++;
     enqueue(ser, child_depart_queue, child_depart_cond);//childReadyDeparting>0 && CHILDreaddepart>0
@@ -146,10 +134,10 @@ void *child_depart_thread(void *arg) {
     CHILD_DEPART++; // Joined the depart queue and performing the functionality;
     CHILD_READY_DEPART--;   
     CHILD_READY_DEPARTING--;
-    printf("Child entering the departing  crowd\n");
+    //printf("Child entering the departing  crowd\n");
     join_crowd(ser, child_depart_crowd, td->body, td->body_arg);
     CHILD_DEPART--; //now departed the child center completely
-    printf("EXIT child depart\n");
+    //printf("EXIT child depart\n");
     exit_serializer(ser);
 
     pthread_exit(NULL);
