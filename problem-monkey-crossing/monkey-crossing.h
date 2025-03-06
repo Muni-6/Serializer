@@ -8,4 +8,3 @@ crowd_t *east_c;
 crowd_t *west_c;
 queue_t *queue_common;
 int capacity;
-

@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include <pthread.h>
-
+#include <stdbool.h>
 #include "monkey-crossing-api.h"
 #include "monkey-crossing.h"
 
@@ -51,14 +49,14 @@ void *eastbound_thread(void *arg) {
     // pthread_exit(NULL);
 }
 
-void *westbound_thread(void *arg) {
-
+void *westbound_thread(void *arg)
+{
     tdata_t *td = (tdata_t *)arg;
 
     enter_serializer(ser);
-    // printf("Westbound entered\n");
 
     enqueue(ser, queue_common, west_cond);
+
     join_crowd(ser, west_c, td->body, td->body_arg);
 
     exit_serializer(ser);
